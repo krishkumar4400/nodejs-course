@@ -5,3 +5,4 @@ exports.loggerMiddleware = function (req, res, next) {
   fs.appendFileSync('logs.txt', log, 'utf-8');
   next();
 };
+
