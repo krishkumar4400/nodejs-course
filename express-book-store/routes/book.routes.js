@@ -1,7 +1,7 @@
 const express = require('express');
 const { BOOKS } = require('../db/book');
 
-const router = express.Router();
+const router = express.Router(); // express gives the functionality for the router
 
 router.get('/', (req, res) => {
   res.json(BOOKS);
