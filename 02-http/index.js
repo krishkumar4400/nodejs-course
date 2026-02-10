@@ -2,7 +2,9 @@ const http = require('node:http');
 
 const server = http.createServer(function (req, res) {
   console.log(`Incomming request at [${Date.now()}]`);
+  console.log(req.headers)
   console.log(req.url);
+  console.log(req.method);
 
   //..
 
