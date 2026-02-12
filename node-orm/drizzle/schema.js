@@ -9,4 +9,4 @@ const usersTable = pgTable("users", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
 });
 
-module.exports = { usersTable };
+module.exports = usersTable;
