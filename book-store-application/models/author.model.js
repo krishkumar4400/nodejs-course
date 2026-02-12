@@ -1,4 +1,3 @@
-const {} = require("drizzle-orm/node-postgres");
 const { text } = require("drizzle-orm/pg-core");
 const { uuid } = require("drizzle-orm/pg-core");
 const { varchar } = require("drizzle-orm/pg-core");
