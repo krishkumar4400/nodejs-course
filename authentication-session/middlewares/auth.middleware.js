@@ -1,20 +1,20 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 export const authenticationMiddleware = async function (req, res, next) {
   try {
-    const tokenHeader = req.headers['authorization'];
+    const tokenHeader = req.headers["authorization"];
 
     if (!tokenHeader) {
       return next();
     }
 
-    if (!tokenHeader.startsWith('Bearer')) {
+    if (!tokenHeader.startsWith("Bearer")) {
       return res
         .status(400)
-        .json({ error: 'authorization header must start with Bearer' });
+        .json({ error: "authorization header must start with Bearer" });
     }
 
-    const token = tokenHeader.split(' ')[1];
+    const token = tokenHeader.split(" ")[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
@@ -26,7 +26,7 @@ export const authenticationMiddleware = async function (req, res, next) {
 
 export const ensureAuthenticated = async function (req, res, next) {
   if (!req.user) {
-    return res.status(401).json({ error: 'You must be authenticated' });
+    return res.status(401).json({ error: "You must be authenticated" });
   }
 
   next();
@@ -37,7 +37,7 @@ export const restrictToRole = function (role) {
     if (req.user.role !== role) {
       return res
         .status(401)
-        .json({ error: 'You are not authorized to access this resource' });
+        .json({ error: "You are not authorized to access this resource" });
     }
 
     return next();
