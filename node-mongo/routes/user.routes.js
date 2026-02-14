@@ -1,22 +1,54 @@
-import express from 'express';
-import { User } from '../models/user.model.js';
-import { randomBytes, createHmac } from 'crypto';
-import jwt from 'jsonwebtoken';
-import { ensureAuthenticated } from '../middlewares/auth.middleware.js';
+import express from "express";
+import { User } from "../models/user.model.js";
+import { randomBytes, createHmac } from "crypto";
+import jwt from "jsonwebtoken";
+import { ensureAuthenticated } from "../middlewares/auth.middleware.js";
+
+const result = User.aggregate([
+  {
+    $lookup: {},
+  },
+  {
+    $match: {}
+  }
+]);
+
+User.aggregate([
+  [
+    {
+      $project:
+        {
+          _id: "$_id",
+          title: "$title",
+        },
+    },
+    {
+      $lookup:
+        {
+          from: "comments",
+          localField: "_id",
+          foreignField: "movie_id",
+          as: "comments",
+        },
+    },
+  ],
+]);
+
+
 
 const router = express.Router();
 
-router.patch('/', ensureAuthenticated, async (req, res) => {
+router.patch("/", ensureAuthenticated, async (req, res) => {
   const { name } = req.body;
 
   await User.findByIdAndUpdate(req.user._id, {
     name,
   });
 
-  return res.json({ status: 'success' });
+  return res.json({ status: "success" });
 });
 
-router.post('/signup', async (req, res) => {
+router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
   const existingUser = await User.findOne({
@@ -29,10 +61,10 @@ router.post('/signup', async (req, res) => {
       .json({ error: `User with email ${email} already exists` });
   }
 
-  const salt = randomBytes(256).toString('hex');
-  const hashedPassword = createHmac('sha256', salt)
+  const salt = randomBytes(256).toString("hex");
+  const hashedPassword = createHmac("sha256", salt)
     .update(password)
-    .digest('hex');
+    .digest("hex");
 
   const user = await User.insertOne({
     name,
@@ -41,10 +73,10 @@ router.post('/signup', async (req, res) => {
     salt,
   });
 
-  return res.status(201).json({ status: 'success', data: { id: user._id } });
+  return res.status(201).json({ status: "success", data: { id: user._id } });
 });
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   const existingUser = await User.findOne({
@@ -60,7 +92,7 @@ router.post('/login', async (req, res) => {
   const salt = existingUser.salt;
   const hashed = existingUser.password;
 
-  const newHash = createHmac('sha256', salt).update(password).digest('hex');
+  const newHash = createHmac("sha256", salt).update(password).digest("hex");
 
   if (hashed !== newHash) {
     return res.status(400).json({ error: `Invalid Password` });
@@ -74,7 +106,7 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign(payload, process.env.JWT_SECRET);
 
-  return res.json({ status: 'success', token });
+  return res.json({ status: "success", token });
 });
 
 export default router;

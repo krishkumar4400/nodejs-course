@@ -15,10 +15,12 @@ router.patch('/', ensureAuthenticated, async (req, res) => {
   return res.json({ status: 'success' });
 });
 
+//  Returns current logged in user
 router.get('/', ensureAuthenticated, async (req, res) => {
   return res.json({ user });
 });
 
+// Sign up
 router.post('/signup', async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -53,6 +55,7 @@ router.post('/signup', async (req, res) => {
   return res.status(201).json({ status: 'success', data: { userId: user.id } });
 });
 
+// login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
