@@ -3,6 +3,7 @@
     "dotenv": "^17.2.4",
     "drizzle-kit": "^0.31.9",
     "drizzle-orm": "^0.45.1",
+    "express": "^5.2.1",
     "pg": "^8.18.0"
   },
   "name": "book-store-application",
@@ -15,7 +16,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node --watch server.js"
   },
   "keywords": [],
   "author": "",
