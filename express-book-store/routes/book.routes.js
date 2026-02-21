@@ -1,5 +1,5 @@
 const express = require('express');
-const { BOOKS } = require('../db/book');
+const { BOOKS } = require('../db/book.js');
 
 const router = express.Router(); // express gives the functionality for the router
 
