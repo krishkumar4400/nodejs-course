@@ -10,4 +10,5 @@ const booksTable = pgTable("books", {
     .notNull(),
 });
 
+
 module.exports = booksTable;

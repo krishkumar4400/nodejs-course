@@ -1,11 +1,11 @@
-import 'dotenv/config';
-import { defineConfig } from 'drizzle-kit';
+import "dotenv/config";
+import { defineConfig } from "drizzle-kit";
 
 console.log("DB URL: ", process.env.DATABASE_URL);
 
 const config = defineConfig({
   out: "./drizzle",
-  schema: "./model/books.js",
+  schema: "./model/index.js",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
