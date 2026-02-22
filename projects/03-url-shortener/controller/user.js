@@ -80,7 +80,7 @@ export async function login(req, res) {
     const isMatch = await bcrypt.compare(password, user.password);
     console.log(isMatch); // true || false
 
-    const token = await createJwt(user.id);
+    const token = await createJwt({id: user.id});
 
     return res.status(200).json({
       message: "You are logged in",

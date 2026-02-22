@@ -1,12 +1,16 @@
+import jwt from "jsonwebtoken";
+import { userTokenSchema } from "../validations/token.validation.js";
 
-import jwt from 'jsonwebtoken';
-
-
-export const createJwt = (id) => {
+export const createJwt = async (payload) => {
   try {
+    const validationResult = await userTokenSchema.safeParseAsync(payload);
+    if (validationResult.error) {
+      throw new Error(validationResult.error.message);
+    }
+    const payloadValidatedData = validationResult.data;
     const token = jwt.sign(
       {
-        id: id,
+        payloadValidatedData
       },
       process.env.JWT_SECRET,
       {
@@ -14,7 +18,7 @@ export const createJwt = (id) => {
       },
     );
 
-    return token
+    return token;
   } catch (error) {
     console.error(error);
     return resizeBy.status(400).json({
