@@ -5,7 +5,7 @@ const userRouter = Router();
 
 userRouter.get('/', getAllUser);
 userRouter.get('/me', getUserData);
-userRouter.post('/update', updateUser);
+userRouter.patch('/update', updateUser);
 userRouter.post('/sign-up', signUp);
 userRouter.post('/login', login);
 
