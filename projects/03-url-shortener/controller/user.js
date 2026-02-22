@@ -1,23 +1,31 @@
-import { usersTable } from "../model/schema.js";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import db from "../db/index.js";
+import {
+  loginPostRequestBodySchema,
+  signUpPostRequestBodySchema,
+} from "../validations/request.validation.js";
+import { z } from "zod";
+import { hashPassword } from "../utils/hash.js";
+import { createJwt } from "../utils/jwtToken.js";
+import { createUser, getUserByEmail } from "../services/user.service.js";
 
 export async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const validationResult = await signUpPostRequestBodySchema.safeParseAsync(
+      req.body,
+    );
+
+    if (validationResult.error) {
       return res.status(400).json({
-        message: "Missing details",
+        message: treeifyError(validationResult.error),
         success: false,
       });
     }
 
-    const [existingUser] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
+    const { firstname, lastname, email } = validationResult.data;
+    let { password } = validationResult.data;
+
+    const existingUser = await getUserByEmail(email);
+
     if (existingUser) {
       return res.status(400).json({
         message: `User with email id ${email} is already exists`,
@@ -25,25 +33,11 @@ export async function register(req, res) {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    password = await hashPassword(password);
 
-    const [user] = await db
-      .insert(usersTable)
-      .values({
-        name,
-        email,
-        password: hashedPassword,
-      })
-      .returning({ id: usersTable.id });
+    const user = await createUser(firstname, lastname, email, password);
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-      },
-      process.env.JWT_SECRET, {
-        expiresIn: '7d'
-      }
-    );
+    const token = await createJwt(user.id);
 
     return res.status(201).json({
       message: "You are registered successfully",
@@ -61,37 +55,38 @@ export async function register(req, res) {
 
 export async function login(req, res) {
   try {
-    const {email, password} = req.body;
+    const validationResult = await loginPostRequestBodySchema.safeParseAsync(
+      req.body,
+    );
 
-    if(!email || !password) {
-        return res.status(400).json({
-            message: "Missing details",
-            success: false 
-        });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: z.treeifyError(validationResult.error),
+        success: false,
+      });
     }
 
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
-    if(!user) {
-        return res.status(400).json({
-            message: "Incorrect email or password",
-            success: false 
-        });
+    const { email, password } = validationResult.data;
 
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Incorrect email or password",
+        success: false,
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     console.log(isMatch); // true || false
 
-    const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {
-        expiresIn: '7d'
-    });
+    const token = await createJwt(user.id);
 
     return res.status(200).json({
-        message: "You are logged in",
-        success: true,
-        token 
+      message: "You are logged in",
+      success: true,
+      token,
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({

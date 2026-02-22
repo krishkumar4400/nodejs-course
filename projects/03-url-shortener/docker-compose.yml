@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:17
+    restart: always
     container_name: url_shortener
     ports:
       - "5434:5432"
@@ -8,3 +9,8 @@ services:
       POSTGRES_USER: krish
       POSTGRES_PASSWORD: krish123
       POSTGRES_DB: url_shortener
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  
+volumes:
+  db_data:
