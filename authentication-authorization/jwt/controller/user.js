@@ -13,6 +13,7 @@ export const login = async (req, res) => {
         id: usersTable.id,
         salt: usersTable.salt,
         password: usersTable.password,
+        role: usersTable.role,
       })
       .from(usersTable)
       .where(eq(usersTable.email, email));
@@ -35,9 +36,13 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: existingUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
-    });
+    const token = jwt.sign(
+      { id: existingUser.id, role: existingUser.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1m",
+      },
+    );
 
     return res.status(200).json({
       message: "You are logged in",
@@ -55,11 +60,10 @@ export const login = async (req, res) => {
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     const [existingUser] = await db
       .select({
         id: usersTable.id,
-        email: usersTable.email,
       })
       .from(usersTable)
       .where(eq(usersTable.email, email));
@@ -81,12 +85,17 @@ export const signup = async (req, res) => {
         email,
         password: hash,
         salt,
+        role
       })
-      .returning({ id: usersTable.id });
+      .returning({ id: usersTable.id, role: usersTable.role });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1m",
-    });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1m",
+      },
+    );
 
     return res.status(200).json({
       message: "You are registered successfully",
