@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: fresh_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: krish
+      POSTGRES_PASSWORD: krish123
+      POSTGRES_DB: mydb

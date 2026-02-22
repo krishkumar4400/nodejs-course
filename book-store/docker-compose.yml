@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: book_store_app
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: krishna 
+      POSTGRES_PASSWORD: krish1234
+      POSTGRES_DB: book_store_db
