@@ -36,7 +36,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: existingUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "1m",
     });
 
     return res.status(200).json({
@@ -85,13 +85,45 @@ export const signup = async (req, res) => {
       .returning({ id: usersTable.id });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "1m",
     });
 
     return res.status(200).json({
       message: "You are registered successfully",
       success: true,
       token,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+export const getUserData = async (req, res) => {
+  try {
+    const user = req.user;
+    console.log(user);
+    if (!user) {
+      return res.status(401).json({
+        message: "Unauthorized login again",
+        success: false,
+      });
+    }
+
+    const data = await db
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        email: usersTable.email,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id));
+    return res.status(200).json({
+      success: true,
+      data,
     });
   } catch (error) {
     console.error(error);
