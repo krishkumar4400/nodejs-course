@@ -1,10 +1,89 @@
 import { eq } from "drizzle-orm";
 import db from "../db/index.js";
-import usersTable from "../model/schema.js";
+import usersTable, { userSessions } from "../model/schema.js";
 import { createHmac, randomBytes } from "node:crypto";
+
+export const updateUser = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({
+        message: "You are not logged in",
+        success: false,
+      });
+    }
+    const { name } = req.body;
+
+    const [data] = await db
+      .update(usersTable)
+      .set({ name })
+      .where(eq(usersTable.id, user.userId))
+      .returning({ id: usersTable.id, name: usersTable.name });
+
+    return res.status(200).json({
+      data,
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      messahe: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+export const getUserData = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        message: "You are not logged in",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
 
 export const getAllUser = async (req, res) => {
   try {
+    const sessionId = req.headers["session-id"];
+    if (!sessionId) {
+      return res.status(401).json({
+        message: "You are not logged in",
+        success: false,
+      });
+    }
+
+    const [data] = await db
+      .select({
+        id: userSessions.id,
+        userId: userSessions.userId,
+        name: usersTable.name,
+        email: usersTable.email,
+      })
+      .from(userSessions)
+      .rightJoin(usersTable, eq(usersTable.id, userSessions.userId))
+      .where((table) => eq(table.id, sessionId));
+
+    if (!data) {
+      return res.status(401).json({
+        message: "You are not logged in",
+        success: false,
+      });
+    }
     const user = await db
       .select({
         name: usersTable.name,
@@ -13,7 +92,7 @@ export const getAllUser = async (req, res) => {
       .from(usersTable);
     console.log(user);
     return res.status(200).json({
-      data: user,
+      data,
       success: true,
     });
   } catch (error) {
@@ -94,6 +173,7 @@ export const login = async (req, res) => {
 
     const [existingUser] = await db
       .select({
+        id: usersTable.id,
         email: usersTable.email,
         salt: usersTable.salt,
         password: usersTable.password,
@@ -122,10 +202,17 @@ export const login = async (req, res) => {
     }
 
     // Generate a session for user.
+    const [session] = await db
+      .insert(userSessions)
+      .values({ userId: existingUser.id })
+      .returning({
+        id: userSessions.id,
+      });
 
     return res.status(200).json({
       message: "You are logged in",
       success: true,
+      sessionId: session.id,
     });
   } catch (error) {
     console.log(error);
