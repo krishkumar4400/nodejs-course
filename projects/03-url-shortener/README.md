@@ -26,6 +26,7 @@ Make sure you have the following installed on your system:
 | Authentication   | JWT               | Securing private routes               |
 | Testing Tool     | Postman           | Manual API testing                    |
 
+nanoid for short code generation
 ---
 
 ## 📦 NPM Dependencies

@@ -16,7 +16,7 @@ export async function register(req, res) {
 
     if (validationResult.error) {
       return res.status(400).json({
-        message: treeifyError(validationResult.error),
+        message: z.treeifyError(validationResult.error),
         success: false,
       });
     }
@@ -37,7 +37,7 @@ export async function register(req, res) {
 
     const user = await createUser(firstname, lastname, email, password);
 
-    const token = await createJwt(user.id);
+    const token = await createJwt({id: user.id});
 
     return res.status(201).json({
       message: "You are registered successfully",

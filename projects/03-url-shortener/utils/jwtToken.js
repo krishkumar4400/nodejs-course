@@ -23,10 +23,7 @@ export const createJwt = async (payload) => {
     return token;
   } catch (error) {
     console.error(error);
-    return resizeBy.status(400).json({
-      message: "Internal server error",
-      success: false,
-    });
+    return null
   }
 };
 
