@@ -31,3 +31,13 @@ export const fetchUrls = async (userId) => {
 export const deleteUrl = async (urlId) => {
   await db.delete(urlsTable).where(eq(urlsTable.id, urlId));
 };
+
+export const redirect = async (shortCode) => {
+  const [result] = await db
+    .select({
+      targetUrl: urlsTable.targetUrl
+    })
+    .from(urlsTable)
+    .where(eq(urlsTable.shortCode, shortCode));
+  return result;
+};

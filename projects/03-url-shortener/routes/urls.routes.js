@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteAUrl, getUrls, shorten } from "../controller/url.js";
+import { deleteAUrl, getUrls, redirectToURL, shorten } from "../controller/url.js";
 
 const urlRouter = Router();
 
@@ -11,5 +11,8 @@ urlRouter.get("/urls", getUrls);
 
 // delete a url
 urlRouter.delete("/delete", deleteAUrl);
+
+// redirect to original url
+urlRouter.get('/:shortCode', redirectToURL);
 
 export default urlRouter;

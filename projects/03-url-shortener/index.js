@@ -20,8 +20,8 @@ app.use(express.json());
 app.use("/api/auth", userRouter);
 
 // protexted route
-app.use(authenticationMiddleware);
-app.use(ensureAuthenticated);
+// app.use(authenticationMiddleware);
+// app.use(ensureAuthenticated);
 app.use("/api/url", urlRouter);
 
 app.listen(port, () => {

@@ -3,7 +3,12 @@ import {
   shortenPostRequestBodySchema,
   uuidDeleteRequestBodySchema,
 } from "../validations/request.validation.js";
-import { deleteUrl, fetchUrls, insertUrl } from "../services/url.service.js";
+import {
+  deleteUrl,
+  fetchUrls,
+  insertUrl,
+  redirect,
+} from "../services/url.service.js";
 
 export async function shorten(req, res) {
   try {
@@ -69,13 +74,34 @@ export async function deleteAUrl(req, res) {
       throw new Error(validationResult.error.message);
     }
 
-    const {urlId} = validationResult.data;
+    const { urlId } = validationResult.data;
 
     await deleteUrl(urlId);
     return res.status(200).json({
       message: "URL deleted successfully",
       success: true,
     });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+}
+
+export async function redirectToURL(req, res) {
+  try {
+    const { shortCode } = req.params;
+    const result = await redirect(shortCode);
+    if(!result) {
+      return res.status(404).json({
+        message: "URL not found",
+        success: false 
+      });
+    }
+
+    return res.redirect(result.targetUrl);
   } catch (error) {
     console.error(error);
     return res.status(500).json({
