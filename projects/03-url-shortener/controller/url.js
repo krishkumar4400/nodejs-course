@@ -68,7 +68,7 @@ export async function getUrls(req, res) {
 export async function deleteAUrl(req, res) {
   try {
     const validationResult = await uuidDeleteRequestBodySchema.safeParseAsync(
-      req.body,
+      req.params,
     );
     if (validationResult.error) {
       throw new Error(validationResult.error.message);
@@ -76,7 +76,7 @@ export async function deleteAUrl(req, res) {
 
     const { urlId } = validationResult.data;
 
-    await deleteUrl(urlId);
+    await deleteUrl(urlId, req.user);
     return res.status(200).json({
       message: "URL deleted successfully",
       success: true,
@@ -94,10 +94,10 @@ export async function redirectToURL(req, res) {
   try {
     const { shortCode } = req.params;
     const result = await redirect(shortCode);
-    if(!result) {
+    if (!result) {
       return res.status(404).json({
         message: "URL not found",
-        success: false 
+        success: false,
       });
     }
 

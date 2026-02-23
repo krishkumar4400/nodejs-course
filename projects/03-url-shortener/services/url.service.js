@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import db from "../db/index.js";
 import { urlsTable } from "../model/schema.js";
 
@@ -28,14 +28,16 @@ export const fetchUrls = async (userId) => {
   return data;
 };
 
-export const deleteUrl = async (urlId) => {
-  await db.delete(urlsTable).where(eq(urlsTable.id, urlId));
+export const deleteUrl = async (urlId, userId) => {
+  await db
+    .delete(urlsTable)
+    .where(and(eq(urlsTable.id, urlId), eq(urlsTable.userId, userId)));
 };
 
 export const redirect = async (shortCode) => {
   const [result] = await db
     .select({
-      targetUrl: urlsTable.targetUrl
+      targetUrl: urlsTable.targetUrl,
     })
     .from(urlsTable)
     .where(eq(urlsTable.shortCode, shortCode));
