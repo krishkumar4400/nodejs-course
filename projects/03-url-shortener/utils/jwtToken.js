@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import { userTokenSchema } from "../validations/token.validation.js";
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 export const createJwt = async (payload) => {
   try {
     const validationResult = await userTokenSchema.safeParseAsync(payload);
@@ -12,7 +14,7 @@ export const createJwt = async (payload) => {
       {
         payloadValidatedData
       },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       {
         expiresIn: "7d",
       },
@@ -27,3 +29,14 @@ export const createJwt = async (payload) => {
     });
   }
 };
+
+export const validateUserToken = async (token) => {
+  try {
+    const tokenDecode = jwt.verify(token, JWT_SECRET);
+
+    return tokenDecode;
+  } catch (error) {
+    console.error(error);
+    return null
+  }
+}

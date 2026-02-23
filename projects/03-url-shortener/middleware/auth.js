@@ -1,25 +1,33 @@
-import jwt from "jsonwebtoken";
+
+/**
+ * @params {import("express").Request} req
+ * @params {import("express").Response} res
+ * @params {import("express").NextFunction} next
+ * 
+ */
+
+import { validateUserToken } from "../utils/jwtToken.js";
 
 export async function authenticationMiddleware(req, res, next) {
   try {
-    const tokenHeader = req.headers.authorization;
-    if (!tokenHeader) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
       return res.status(401).json({
         message: "You are not logged in",
         success: false,
       });
     }
 
-    if (!tokenHeader.startWith("Bearer")) {
+    if (!authHeader.startWith("Bearer")) {
       return res.status(400).json({
         message: "Incorrect token",
         success: false,
       });
     }
 
-    const token = tokenHeader.split(" ")[1];
+    const [_, token] = authHeader.split(' '); // [Bearer, <TOKEN>]
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = await validateUserToken(token);
     req.user = decoded.id;
     next();
   } catch (error) {
